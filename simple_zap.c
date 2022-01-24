@@ -96,69 +96,57 @@ int main(int argc, char **argv){
     dvb_init(&dev, &fe, &lnb);
     if ((out=parse_args(argc, argv, &dev, &fe, &lnb, filename)) < 0)
 	exit(2);
-    printf("out %d\n",out);
-    if (out == 6){
-	int k = 0;
-	int done = 0;
-	do {
-	    int fd = 0;
-	    if ( (fd = open_fe(dev.adapter, k)) < 0){
-		done =1;
-	    } else {
-		k++;
-		close(fd);
-	    }
-	} while(!done);
-	max = k;
-	err ("Found %d frontends\n",max);
+
+    dvb_open(&dev, &fe, &lnb);
+    switch (out) {
+	
+    case 1:
+    {
+	uint8_t *buf=(uint8_t *)malloc(BUFFSIZE);
+	
+	if (filename){
+	    err("writing to %s\n", filename);
+	    fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC,
+		      00644);
+	} else {
+	    err("writing to stdout\n");
+	    fd = fileno(stdout); 
+	}
+	if ((lock = dvb_tune(&dev, &fe, &lnb, 1)) != 1) exit(lock);
+	while(lock){
+	    int re = read(dev.fd_dvr,buf,BUFFSIZE);
+	    re = write(fd,buf,re);
+	}
+	break;
     }
     
-    dvb_open(&dev, &fe, &lnb);
-    if ((lock = dvb_tune(&dev, &fe, &lnb)) != 1) exit(lock);
-    if (lock){
-	switch (out) {
-	    
-	case 1:
-	{
-	    uint8_t *buf=(uint8_t *)malloc(BUFFSIZE);
-	
-	    if (filename){
-		err("writing to %s\n", filename);
-		fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC,
-			  00644);
-	    } else {
-		err("writing to stdout\n");
-		fd = fileno(stdout); 
+    case 0:
+	close(dev.fd_dvr);
+	close(dev.fd_dmx);
+	int c=0;
+	while (1) {
+	    fe_status_t stat;
+	    int64_t str, cnr;
+            
+	    if(!lock && !(c%4)){
+		lock = dvb_tune(&dev, &fe, &lnb, 0);
+		c++;
 	    }
-	    while(lock){
-		int re = read(dev.fd_dvr,buf,BUFFSIZE);
-		re = write(fd,buf,re);
-	    }
-	    break;
-	}
+	    stat = dvb_get_stat(dev.fd_fe);
+	    str = dvb_get_strength(dev.fd_fe);
+	    cnr = dvb_get_cnr(dev.fd_fe);
+	    lock = read_status(dev.fd_fe);
 
-	case 0:
-	    close(dev.fd_dvr);
-	    close(dev.fd_dmx);
-	    
-	    while (1) {
-		fe_status_t stat;
-		int64_t str, cnr;
-                
-		stat = dvb_get_stat(dev.fd_fe);
-		str = dvb_get_strength(dev.fd_fe);
-		cnr = dvb_get_cnr(dev.fd_fe);
-                
-		printf("stat=%02x, str=%" PRId64 ".%03udBm, "
-		       "snr=%" PRId64 ".%03uddB \n",
-		       stat, str/1000, abs(str%1000),
-		       cnr/1000, abs(cnr%1000));
-                sleep(1);
-	    }
-
-	
-	default:
-	    break;
+	    printf("stat=%02x, str=%" PRId64 ".%03udBm, "
+		   "snr=%" PRId64 ".%03uddB \n",
+		   stat, str/1000, abs(str%1000),
+		   cnr/1000, abs(cnr%1000));
+	    sleep(1);
 	}
+	
+	
+    default:
+	break;
     }
 }
+
