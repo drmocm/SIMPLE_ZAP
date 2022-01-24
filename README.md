@@ -16,22 +16,22 @@ Use `./simple_zap -h` to see the following help information:
 		-i input     : the physical input of the SX8 (default=0)
 		-I id        : set id (do not use if you don't know)
 		-l ls l1 l2  : set lofs lof1 lof2 
-                       (default 11700000 9750000 10600000)
-	    -L n         : diseqc switch to LNB/SAT number n (default 0)
+                 	      (default 11700000 9750000 10600000)
+	    	-L n         : diseqc switch to LNB/SAT number n (default 0)
 		-p pol       : polarisation 0=vertical 1=horizontal
 		               (must be set for any diseqc command to be send)
-	    -s rate      : the symbol rate in Symbols/s
+	    	-s rate      : the symbol rate in Symbols/s
 		-u           : use hi band of LNB
 		-D           : use 1s delay to wait for LNB power up
 		-U type      : lnb is unicable type (1: EN 50494, 2: TS 50607
-	                   3: Inverto LNB of type 2 with 32 pre-programmed slots)
-	    -j slot      : slot s ( default slot 1)
-	    -J freq      : freq (default 1210 MHz)
+	        	       3: Inverto LNB of type 2 with 32 pre-programmed slots)
+	    	-j slot      : slot s ( default slot 1)
+	    	-J freq      : freq (default 1210 MHz)
 
 	OTHERS:
 		-O           : write full TS to stdout or filename
-	    -o filename  : output filename
-	    -h           : this help message
+	    	-o filename  : output filename
+	    	-h           : this help message
 
 Example:
 
