@@ -8,7 +8,7 @@ set all the parameters by hand, i.e.
 Use `./simple_zap -h` to see the following help information:
 
 	TUNING OPTIONS:
-		-d delsys    : the delivery system
+		-d delsys    : the delivery system (default DVB-S2)
 		-a adapter   : the number n of the DVB adapter, i.e. 
 		               /dev/dvb/adapter[n] (default=0)
         -e frontend  : the frontend/dmx/dvr to be used (default=0)
@@ -35,8 +35,11 @@ Use `./simple_zap -h` to see the following help information:
 
 Example:
 
-1) A unicable Ku-band LNB with slot 1 at 1210 on input 2 of an SX8 Max card
-   piped into vlc:
+1) Tuning a unicable Ku-band LNB with slot 1 at 1210 on input 2 of an 
+   SX8 Max card as adapter 0  piped into vlc:
 
 	./simple_zap -f 12188000 -s 27500000 -p h -U 2 -j 1 -J 1210 -i 2 1420000 -O|vlc -
-	
+
+2) Tuning a cable channel on a DVB-C receiver card as afapter 1
+  
+	./simple_zap -a 1 -d C -f 394000 -s 6900000 -O | vlc -
