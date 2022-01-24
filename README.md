@@ -1,6 +1,6 @@
 # SIMPLE_ZAP
 
-simple_zap is a DVB tuning program, where you can (or have to)
+simple_zap is a DVB (S/S2/C for now) tuning program, where you can (or have to)
 set all the parameters by hand, i.e.
 
 `./simple_zap -f 12188000 -s 27500000 -p h -U 2 -j 1 1210 -i 2 1420000 -l 1170000 9750000 10600000`
