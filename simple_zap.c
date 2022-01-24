@@ -28,6 +28,7 @@ void print_help()
     dvb_print_tuning_options();
     err(
 	    "\n OTHERS:\n"
+	    " -O           : write full TS to stdout or filename\n"
 	    " -o filename  : output filename\n"
 	    " -h           : this help message\n\n"
 	);
@@ -46,19 +47,24 @@ int parse_args(int argc, char **argv, dvb_devices *dev,
 	int option_index = 0;
 	int c;
 	static struct option long_options[] = {
+	    {"open dvr", required_argument , 0, 'O'},
 	    {"fileout", required_argument , 0, 'o'},
 	    {"help", no_argument , 0, 'h'},
 	    {0, 0, 0, 0}
 	};
 	
-	c = getopt_long(argc, argv, "ho:C", long_options, &option_index);
+	c = getopt_long(argc, argv, "ho:O", long_options, &option_index);
 	if (c==-1)
 	    break;
 	
 	switch (c) {
-	case 'o':
-	    fname = strdup(optarg);
+	case 'O':
 	    out = 1;
+	    break;
+	    
+	case 'o':
+	    out = 1;
+	    fname = strdup(optarg);
 	    break;
 	    
 	case 'h':
@@ -90,7 +96,7 @@ int main(int argc, char **argv){
     dvb_init(&dev, &fe, &lnb);
     if ((out=parse_args(argc, argv, &dev, &fe, &lnb, filename)) < 0)
 	exit(2);
-
+    printf("out %d\n",out);
     if (out == 6){
 	int k = 0;
 	int done = 0;
