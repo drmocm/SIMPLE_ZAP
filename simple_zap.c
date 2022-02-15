@@ -92,12 +92,19 @@ int main(int argc, char **argv){
     uint8_t sec_buf[4096];
     int re=0;
     int max = 0;
+    pthread_mutex_t *tlock;
+    pthread_t tMux;
+    tune_data *tdat;
     
     dvb_init(&dev, &fe, &lnb);
     if ((out=parse_args(argc, argv, &dev, &fe, &lnb, filename)) < 0)
 	exit(2);
 
     dvb_open(&dev, &fe, &lnb);
+    tlock = dvb_add_lock(&dev);
+
+    tdat = create_tune_data(&dev, &fe, &lnb);
+    start_tune_thread(&tMux, tdat);
     switch (out) {
 	
     case 1:
@@ -112,10 +119,11 @@ int main(int argc, char **argv){
 	    err("writing to stdout\n");
 	    fd = fileno(stdout); 
 	}
-	if ((lock = dvb_tune(&dev, &fe, &lnb, 1)) != 1) exit(lock);
-	while(lock){
+
+	while(1){
 	    int re = read(dev.fd_dvr,buf,BUFFSIZE);
 	    re = write(fd,buf,re);
+	    fprint_stat(stdout, tdat);
 	}
 	break;
     }
@@ -125,22 +133,8 @@ int main(int argc, char **argv){
 	close(dev.fd_dmx);
 	int c=0;
 	while (1) {
-	    fe_status_t stat;
-	    int64_t str, cnr;
-            
-	    if(!lock && !(c%4)){
-		lock = dvb_tune(&dev, &fe, &lnb, 0);
-		c++;
-	    }
-	    stat = dvb_get_stat(dev.fd_fe);
-	    str = dvb_get_strength(dev.fd_fe);
-	    cnr = dvb_get_cnr(dev.fd_fe);
-	    lock = read_status(dev.fd_fe);
+	    fprint_stat(stdout, tdat);
 
-	    printf("stat=%02x, str=%" PRId64 ".%03udBm, "
-		   "snr=%" PRId64 ".%03uddB \n",
-		   stat, str/1000, abs(str%1000),
-		   cnr/1000, abs(cnr%1000));
 	    sleep(1);
 	}
 	
