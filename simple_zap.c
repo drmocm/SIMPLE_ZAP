@@ -120,10 +120,19 @@ int main(int argc, char **argv){
 	    fd = fileno(stdout); 
 	}
 
+	struct timespec tp,otp;
+	clock_gettime(CLOCK_REALTIME, &otp);
+
+
 	while(1){
 	    int re = read(dev.fd_dvr,buf,BUFFSIZE);
 	    re = write(fd,buf,re);
-	    fprint_stat(stdout, tdat);
+	    clock_gettime(CLOCK_REALTIME, &tp);
+	    if (tp.tv_sec > otp.tv_sec+1){
+		fprint_stat(stderr, tdat);
+		clock_gettime(CLOCK_REALTIME, &otp);
+	    }
+	    
 	}
 	break;
     }
